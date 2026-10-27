@@ -1,0 +1,30 @@
+{
+  "name": "review14-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SaaS B2B2C de Gestão de Reputação, Triagem de Feedbacks e CRM para Estabelecimentos",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:client": "pnpm --filter client dev",
+    "dev:tenant": "pnpm --filter tenant dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "dev:core": "pnpm --filter @saas/core dev",
+    "build": "pnpm --filter @saas/core build && pnpm --filter \"./apps/*\" build",
+    "build:core": "pnpm --filter @saas/core build",
+    "typecheck": "pnpm --recursive exec tsc --noEmit",
+    "lint": "pnpm --recursive exec next lint",
+    "db:generate": "pnpm --filter @saas/core db:generate",
+    "db:push": "pnpm --filter @saas/core db:push",
+    "db:migrate": "pnpm --filter @saas/core db:migrate",
+    "db:seed": "pnpm --filter @saas/core db:seed",
+    "clean": "pnpm --recursive exec rm -rf node_modules .turbo .next dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
