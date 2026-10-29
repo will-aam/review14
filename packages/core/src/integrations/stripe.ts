@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { prisma } from "../db/client";
 import { PlanTier, SubscriptionStatus } from "@prisma/client";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_build_placeholder", {
   apiVersion: "2024-09-30.acacia" as Stripe.LatestApiVersion,
   typescript: true,
 });
@@ -66,7 +66,7 @@ export class StripeService {
   static async handleWebhookEvent(event: Stripe.Event) {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as Stripe.CheckoutSession;
+        const session = event.data.object as Stripe.Checkout.Session;
         const companyId = session.metadata?.companyId;
 
         if (companyId && session.subscription) {

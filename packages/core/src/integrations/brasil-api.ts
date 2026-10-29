@@ -48,7 +48,7 @@ export class BrasilApiService {
 
     const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`, {
       headers: { "User-Agent": "Review14-SaaS" },
-      next: { revalidate: 3600 },
+      ...({ next: { revalidate: 3600 } } as any),
     });
 
     if (!res.ok) {

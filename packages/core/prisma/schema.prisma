@@ -1,14 +1,13 @@
 // packages/core/prisma/schema.prisma
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") // Recomendado para conexões com pooling no Neon
+  directUrl = env("DIRECT_URL")
 }
 
 // ==========================================
@@ -16,7 +15,7 @@ datasource db {
 // ==========================================
 
 enum Role {
-  SUPER_ADMIN // Você (Dono do SaaS)
+  SUPER_ADMIN // Dono do SaaS
   TENANT      // Lojista (Dono do Estabelecimento)
   CUSTOMER    // Cliente Final (Quem avalia)
 }
@@ -37,7 +36,7 @@ enum SubscriptionStatus {
 }
 
 enum PlanTier {
-  BASIC // Apenas 5 estrelas geral + comentário (Ex: R$ 29,90)
+  BASIC // Apenas 5 estrelas geral + comentário
   PRO   // Libera subcategorias de estrelas, acordeons e perguntas prontas
 }
 
@@ -59,101 +58,99 @@ enum MediaType {
 
 model User {
   id           String       @id @default(cuid())
-  email        String       @unique // Chave única para não duplicar o cliente entre várias lojas
+  email        String       @unique
   name         String
-  avatarUrl    String?      // Foto do Google/Apple ou avatar minimalista da biblioteca
-  passwordHash String?      // Usado apenas para login de TENANT ou SUPER_ADMIN
+  phone        String?      // WhatsApp / Contato do cliente (CRM)
+  avatarUrl    String?
+  passwordHash String?
   
   role         Role         @default(CUSTOMER)
   authProvider AuthProvider @default(EMAIL_OTP)
-  providerId   String?      // Sub/ID retornado pela Apple ou Google
+  providerId   String?
+  isActive     Boolean      @default(true) // Moderação pelo Super Admin
 
-  // Enriquecimento progressivo (Não obrigatórios na triagem)
+  // Enriquecimento progressivo
   gender       String?
-  birthDate    DateTime?    // Melhor que "idade" fixa para automações de marketing
-  zipCode      String?      // CEP
-  neighborhood String?      // Bairro
+  birthDate    DateTime?
+  zipCode      String?
+  neighborhood String?
   city         String?
   state        String?
 
   // Relacionamentos
-  companies    Company[]      // Se for TENANT, empresas que ele administra
-  reviews      Review[]       // Histórico global de avaliações feitas pelo cliente
-  tenantLeads  CustomerLead[] // Vínculo de CRM com os estabelecimentos que ele já avaliou
+  companies    Company[]
+  reviews      Review[]
+  tenantLeads  CustomerLead[]
 
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-
-  @@index([email])
 }
 
 model VerificationCode {
   id        String   @id @default(cuid())
   email     String
-  code      String   // Código OTP numérico enviado por e-mail
+  code      String   // Código OTP de 6 dígitos
   expiresAt DateTime
   used      Boolean  @default(false)
 
   createdAt DateTime @default(now())
 
   @@index([email, code])
+  @@index([expiresAt])
 }
 
 // ==========================================
-// 2. LOJISTA (TENANT) E MONETIZAÇÃO (STRIPE)
+// 2. LOJISTA (TENANT) E MONETIZAÇÃO
 // ==========================================
 
 model Company {
-  id          String   @id @default(cuid())
-  slug        String   @unique // Usado na URL do QR Code: app.com/avaliar/[slug]
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  cnpj               String   @unique
+  legalName          String
+  tradeName          String
+  category           String
+  logoUrl            String?
+  isActive           Boolean  @default(true) // Bloqueio manual do Super Admin
   
-  // Dados puxados automaticamente via Brasil API no Onboarding
-  cnpj        String   @unique
-  legalName   String   // Razão Social
-  tradeName   String   // Nome Fantasia
-  category    String   // Categoria (Restaurante, Clínica, Salão, etc.)
-  logoUrl     String?  // Armazenado no Cloudflare R2
-  
-  // Endereço da Empresa
-  zipCode      String?
-  street       String?
-  number       String?
-  complement   String?
-  neighborhood String?
-  city         String?
-  state        String?
-  phone        String?
+  // Endereço e Contato
+  zipCode            String?
+  street             String?
+  number             String?
+  complement         String?
+  neighborhood       String?
+  city               String?
+  state              String?
+  phone              String?
 
-  // Configurações de Triagem e Redirecionamento
-  googlePlaceId       String? // ID para redirecionar clientes que deram 4 ou 5 estrelas
-  minRatingForGoogle  Int     @default(4) // Nota mínima que aciona o convite pro Google
+  // Triagem e Redirecionamento
+  googlePlaceId      String?
+  customRedirectUrl  String?  // Fallback opcional (WhatsApp, TripAdvisor, etc.)
+  minRatingForGoogle Int      @default(4)
 
-  // Controle Financeiro e Assinatura (Stripe)
-  stripeCustomerId       String?            @unique
-  stripeSubscriptionId   String?            @unique
-  stripePriceId          String?
-  planTier               PlanTier           @default(BASIC)
-  subscriptionStatus     SubscriptionStatus @default(TRIALING)
-  currentPeriodEnd       DateTime?
+  // Stripe & Assinaturas
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  planTier             PlanTier           @default(BASIC)
+  subscriptionStatus   SubscriptionStatus @default(TRIALING)
+  currentPeriodEnd     DateTime?
 
-  // Relacionamento com o Dono do Estabelecimento
+  // Relacionamento com o Lojista
   ownerId      String
-  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  // Relacionamentos do Ecossistema da Loja
+  // Relacionamentos
   reviews      Review[]
   customFields CustomField[]
   leads        CustomerLead[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
-  @@index([slug])
-  @@index([cnpj])
   @@index([ownerId])
 }
 
-// Tabela de CRM do Lojista (Vincula o Usuário Global à Empresa específica sem duplicar conta)
 model CustomerLead {
   id              String   @id @default(cuid())
   companyId       String
@@ -162,58 +159,55 @@ model CustomerLead {
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  marketingOptIn  Boolean  @default(true) // Permissão para disparos de e-mail/campanhas
+  marketingOptIn  Boolean  @default(true)
   totalReviews    Int      @default(1)
+  notes           String?  // Anotações internas do lojista
   lastVisitedAt   DateTime @default(now())
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  @@unique([companyId, userId]) // Garante que o cliente só entre 1 vez na lista daquela loja
+  @@unique([companyId, userId])
   @@index([companyId])
+  @@index([userId]) // Otimiza busca de lojas frequentadas pelo cliente
 }
 
 // ==========================================
-// 3. MOTOR DE AVALIAÇÕES E MÍDIA (CLOUDFLARE)
+// 3. AVALIAÇÕES E MÍDIA
 // ==========================================
 
 model Review {
   id              String   @id @default(cuid())
-  
-  // Nota Geral Obrigatória (1 a 5 estrelas) e Comentário Principal
-  overallRating   Int      // Validado no Zod entre 1 e 5
+  overallRating   Int      // 1 a 5 estrelas
   comment         String?  @db.Text
 
   // Identificação do Avaliador
   isAnonymous     Boolean  @default(false)
-  anonymousName   String?  // Nome aleatório gerado no front se não fizer login
-  anonymousAvatar String?  // Avatar da biblioteca se não fizer login
+  anonymousName   String?
+  anonymousAvatar String?
   
-  // Se fez login (Google, Apple ou OTP), vincula à Conta Global
   userId          String?
   user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  // Vínculo Obrigatório com a Empresa avaliada
   companyId       String
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  // Controle de Feed e Ouvidoria Interna
-  isPublic        Boolean  @default(true) // Notas baixas podem ficar ocultas do feed público
-  merchantReply   String?  @db.Text       // Resposta do dono do estabelecimento
+  // Ouvidoria e Feed
+  isPublic        Boolean  @default(true)
+  isResolved      Boolean  @default(false) // Controle de resolução de queixas na ouvidoria
+  merchantReply   String?  @db.Text
   repliedAt       DateTime?
 
-  // Contexto opcional (Caso queira passar via URL/PDV no futuro)
   amountSpent     Decimal? @db.Decimal(10, 2)
 
-  // Relacionamentos da Avaliação
   media           ReviewMedia[]
   customAnswers   CustomAnswer[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  @@index([companyId, createdAt(sort: Desc)]) // Otimiza o carregamento do Feed da loja
-  @@index([userId]) // Otimiza o botão "Ver minhas avaliações" do cliente
+  @@index([companyId, isPublic, createdAt(sort: Desc)]) // Otimizado para o Feed público e Ouvidoria
+  @@index([userId])
 }
 
 model ReviewMedia {
@@ -221,8 +215,8 @@ model ReviewMedia {
   reviewId  String
   review    Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-  url       String    // URL pública do arquivo no Cloudflare R2
-  fileKey   String    // Chave interna no bucket do R2 (útil caso precise deletar o arquivo)
+  url       String
+  fileKey   String
   type      MediaType @default(IMAGE)
   sizeBytes Int?
 
@@ -232,7 +226,7 @@ model ReviewMedia {
 }
 
 // ==========================================
-// 4. CAMPOS DINÂMICOS (UPSELL / PLANO PRO)
+// 4. CAMPOS DINÂMICOS (PLANO PRO)
 // ==========================================
 
 model CustomField {
@@ -240,14 +234,11 @@ model CustomField {
   companyId   String
   company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  label       String    // Ex: "Comida", "Nível de barulho", "Opções Vegetarianas"
-  description String?   // Subtítulo explicativo opcional
+  label       String
+  description String?
   fieldType   FieldType @default(RATING_5)
-  
-  // Se for SINGLE_SELECT ou MULTI_SELECT, guarda as opções prontas (Ex: ["No local", "Retirada", "Entrega"])
   options     Json?     
-  
-  order       Int       @default(0) // Ordem de exibição no formulário do cliente
+  order       Int       @default(0)
   isActive    Boolean   @default(true)
 
   answers     CustomAnswer[]
@@ -260,21 +251,19 @@ model CustomField {
 
 model CustomAnswer {
   id            String      @id @default(cuid())
-  
   reviewId      String
   review        Review      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   
   customFieldId String
   customField   CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
 
-  // Armazena o valor dependendo do tipo do campo configurado pelo lojista
-  ratingValue   Int?        // Usado se o campo for RATING_5 (1 a 5 estrelas)
-  textValue     String?     // Usado se for TEXT ou SINGLE_SELECT
-  selectedItems Json?       // Usado se for MULTI_SELECT (Acordeon com várias marcações)
+  ratingValue   Int?
+  textValue     String?
+  selectedItems Json?
 
   createdAt     DateTime    @default(now())
 
-  @@unique([reviewId, customFieldId]) // Uma resposta por campo em cada avaliação
+  @@unique([reviewId, customFieldId])
   @@index([reviewId])
   @@index([customFieldId])
 }
