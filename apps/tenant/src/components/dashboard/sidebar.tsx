@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
+import { createClient } from "@/lib/supabase/client";
 
 interface SidebarProps {
   onCloseMobile?: () => void;
@@ -11,8 +12,48 @@ interface SidebarProps {
 
 export function Sidebar({ onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const [userName, setUserName] = React.useState("José Lucas");
+  const [userRole, setUserRole] = React.useState("Gerente Geral");
+  const [userInitials, setUserInitials] = React.useState("JL");
+
+  React.useEffect(() => {
+    async function loadUser() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "José Lucas";
+          const email = user.email || "Gerente Geral";
+          setUserName(name);
+          setUserRole(user.user_metadata?.role || email);
+
+          const parts = name.split(" ");
+          const initials = parts.length > 1
+            ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+            : name.slice(0, 2).toUpperCase();
+          setUserInitials(initials);
+        }
+      } catch (err) {
+        console.error("Error loading user in sidebar:", err);
+      }
+    }
+    loadUser();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Error signing out:", err);
+    } finally {
+      window.location.href = "/login";
+    }
+  };
 
   const navItems = [
     {
@@ -30,7 +71,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
     },
     {
       label: "Avaliações",
-      href: "/#avaliacoes",
+      href: "/reviews",
       badge: "12 novas",
       icon: (active: boolean) => (
         <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
@@ -182,28 +223,29 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-[12px] font-semibold text-white">
-              JL
+              {userInitials}
             </div>
             <div className="flex flex-col">
               <span className="text-[13px] font-semibold leading-4 text-[#0F172A] dark:text-[#F8FAFC]">
-                José Lucas
+                {userName}
               </span>
               <span className="text-[11px] leading-3.5 text-[#64748B] dark:text-[#94A3B8]">
-                Gerente Geral
+                {userRole}
               </span>
             </div>
           </div>
-          <Link
-            href="/login"
-            title="Sair"
-            className="flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1F2937] transition-colors"
+          <button
+            type="button"
+            onClick={handleSignOut}
+            title="Sair da Conta (Logout)"
+            className="flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-[#1F2937] transition-colors cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke={isDark ? "#94A3B8" : "#64748B"} strokeWidth="2" />
-              <polyline points="16 17 21 12 16 7" fill="none" stroke={isDark ? "#94A3B8" : "#64748B"} strokeWidth="2" />
-              <line x1="21" y1="12" x2="9" y2="12" stroke={isDark ? "#94A3B8" : "#64748B"} strokeWidth="2" />
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" strokeWidth="2" />
+              <polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" strokeWidth="2" />
+              <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" />
             </svg>
-          </Link>
+          </button>
         </div>
       </div>
     </aside>
