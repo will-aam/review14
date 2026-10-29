@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent } from "@ui/components/card";
+import { Badge } from "@ui/components/badge";
+import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
+import { Avatar, AvatarFallback } from "@ui/components/avatar";
 
 interface ReviewItem {
   id: string;

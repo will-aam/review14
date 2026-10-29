@@ -4,9 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogoBadge } from "@/components/auth/logo-badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@ui/components/card";
+import { Button } from "@ui/components/button";
+import { Badge } from "@ui/components/badge";
 
 export default function HomePage() {
   const router = useRouter();

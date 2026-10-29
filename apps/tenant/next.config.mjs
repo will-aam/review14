@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@saas/core"],
+  transpilePackages: ["@saas/core", "@saas/ui"],
   experimental: {
     externalDir: true,
   },

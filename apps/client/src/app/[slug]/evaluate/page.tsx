@@ -2,15 +2,15 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@ui/components/button";
+import { Badge } from "@ui/components/badge";
+import { Textarea } from "@ui/components/textarea";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
+} from "@ui/components/accordion";
 
 export default function EvaluatePage() {
   const params = useParams();

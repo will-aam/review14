@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@ui/components/card";
+import { Button } from "@ui/components/button";
 
 interface ReviewResult {
   overallRating: number;

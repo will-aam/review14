@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@saas/core"],
+  transpilePackages: ["@saas/core", "@saas/ui"],
   experimental: {
-    externalDir: true, // Permite importar arquivos TSX direto da pasta ../../ui na raiz
+    externalDir: true,
   },
   images: {
     remotePatterns: [

@@ -1,9 +1,10 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[10px] text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.99]",
   {
     variants: {
       variant: {
@@ -18,14 +19,14 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         google:
-          "bg-white text-gray-800 border border-gray-200 shadow-sm hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-800",
+          "bg-white text-[#0F172A] border border-[#CBD5E1] shadow-sm hover:bg-slate-50",
         apple:
-          "bg-black text-white hover:bg-gray-900 shadow-sm dark:bg-white dark:text-black dark:hover:bg-gray-100",
+          "bg-[#0F172A] text-white shadow-sm hover:bg-slate-800",
       },
       size: {
         default: "h-11 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-14 rounded-xl px-8 text-base font-semibold",
+        sm: "h-9 rounded-[8px] px-3",
+        lg: "h-12 rounded-[10px] px-8 text-[15px] font-semibold",
         icon: "h-10 w-10",
       },
       fullWidth: {
@@ -46,10 +47,11 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, fullWidth, ...props }, ref) => {
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, fullWidth, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
     return (
-      <button
+      <Comp
         className={cn(buttonVariants({ variant, size, fullWidth, className }))}
         ref={ref}
         {...props}
@@ -57,6 +59,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   }
 );
-
 Button.displayName = "Button";
-export { buttonVariants };
+
+export { Button, buttonVariants };

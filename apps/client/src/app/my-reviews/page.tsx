@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent } from "@ui/components/card";
+import { Badge } from "@ui/components/badge";
+import { Avatar, AvatarFallback } from "@ui/components/avatar";
 
 export default function MyReviewsPage() {
   const reviews = [
