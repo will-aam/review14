@@ -2,7 +2,13 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 import { AuthService } from "@saas/core";
-import { AuthProvider } from "@prisma/client";
+
+// Tipo compatível com AuthProvider do schema
+type AuthProviderType = "GOOGLE" | "APPLE" | "EMAIL" | "MAGIC_LINK";
+const AuthProvider = {
+  GOOGLE: "GOOGLE" as AuthProviderType,
+  APPLE: "APPLE" as AuthProviderType,
+};
 
 const handler = NextAuth({
   providers: [
@@ -29,7 +35,7 @@ const handler = NextAuth({
         email: user.email,
         name: user.name || user.email.split("@")[0],
         avatarUrl: user.image,
-        authProvider: provider,
+        authProvider: provider as any,
         providerId: account?.providerAccountId,
       });
 
