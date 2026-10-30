@@ -114,6 +114,12 @@ importers:
       '@saas/ui':
         specifier: workspace:*
         version: link:../../ui
+      '@supabase/ssr':
+        specifier: ^0.12.7
+        version: 0.12.7(@supabase/supabase-js@2.118.0)
+      '@supabase/supabase-js':
+        specifier: ^2.118.0
+        version: 2.118.0
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1

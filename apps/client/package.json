@@ -17,6 +17,8 @@
     "@radix-ui/react-tabs": "^1.2.1",
     "@saas/core": "workspace:*",
     "@saas/ui": "workspace:*",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.453.0",

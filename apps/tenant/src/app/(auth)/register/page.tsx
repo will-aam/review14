@@ -40,7 +40,13 @@ export default function RegisterPage() {
 
       if (error) {
         console.error("Google OAuth error:", error);
-        setErrorMsg(error.message || "Erro ao conectar com Google.");
+        if (error.message.includes("provider is not enabled") || error.message.includes("Unsupported provider")) {
+          setErrorMsg(
+            "O login com Google precisa ser ativado no seu painel do Supabase (Authentication > Providers > Google) adicionando o Client ID e Client Secret."
+          );
+        } else {
+          setErrorMsg(error.message || "Erro ao conectar com Google.");
+        }
         setGoogleLoading(false);
       }
     } catch (err: any) {

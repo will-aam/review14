@@ -5,10 +5,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   const cookieStore = cookies();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://sohqgyizqddasvhgxhqa.supabase.co";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://tacrpktefuolrgsnbkej.supabase.co";
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvaHFneWl6cWRkYXN2aGd4aHFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NTk5MTQsImV4cCI6MjEwNjAzNTkxNH0.dSv3LxE_V9Q1a2jp9T6zb---w7kPKkXl1jCD3HdJxiY";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhY3Jwa3RlZnVvbHJnc25ia2VqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMDMzOTksImV4cCI6MjEwODg3OTM5OX0.NKp80mNetlhuOblqLZh5iNQzOso4mqXftSCGzAF9Kq0";
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -33,8 +33,4 @@ export async function POST(request: NextRequest) {
   return NextResponse.redirect(new URL("/login", request.url), {
     status: 302,
   });
-}
-
-export async function GET(request: NextRequest) {
-  return POST(request);
 }
