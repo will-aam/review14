@@ -106,7 +106,7 @@ model VerificationCode {
 model Company {
   id                 String   @id @default(cuid())
   slug               String   @unique
-  cnpj               String   @unique
+  cnpj               String?  @unique
   legalName          String
   tradeName          String
   category           String

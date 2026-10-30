@@ -20,7 +20,26 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
   const [userRole, setUserRole] = React.useState("Gerente Geral");
   const [userInitials, setUserInitials] = React.useState("JL");
 
+  const [companyName, setCompanyName] = React.useState("Café Aurora");
+  const [companyCategory, setCompanyCategory] = React.useState("Unidade Centro");
+  const [companyInitials, setCompanyInitials] = React.useState("CA");
+
   React.useEffect(() => {
+    // Carrega dados da empresa salvos no Onboarding
+    try {
+      const savedCompanyStr = localStorage.getItem("review14_current_company");
+      if (savedCompanyStr) {
+        const company = JSON.parse(savedCompanyStr);
+        if (company.tradeName) {
+          setCompanyName(company.tradeName);
+          setCompanyCategory(company.category || "Unidade Centro");
+          setCompanyInitials(company.tradeName.slice(0, 2).toUpperCase());
+        }
+      }
+    } catch (e) {
+      // Ignora erro de parsing
+    }
+
     async function loadUser() {
       try {
         const supabase = createClient();
@@ -158,14 +177,14 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
         >
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#DBEAFE] dark:bg-blue-950/70 text-[12px] font-bold text-[#1D4ED8] dark:text-blue-400">
-              CA
+              {companyInitials}
             </div>
             <div className="flex flex-col">
               <span className="text-[13px] font-semibold leading-4 text-[#0F172A] dark:text-[#F8FAFC]">
-                Café Aurora
+                {companyName}
               </span>
               <span className="text-[11px] leading-3.5 text-[#64748B] dark:text-[#94A3B8]">
-                Unidade Centro
+                {companyCategory}
               </span>
             </div>
           </div>

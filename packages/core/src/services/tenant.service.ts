@@ -45,6 +45,7 @@ export class TenantService {
     return prisma.company.create({
       data: {
         ...data,
+        legalName: data.legalName || data.tradeName,
         ownerId,
       },
     });

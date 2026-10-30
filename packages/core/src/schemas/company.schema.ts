@@ -4,14 +4,16 @@ export const cnpjRegex = /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/;
 
 export const createCompanySchema = z.object({
   cnpj: z
-    .string({ required_error: "CNPJ é obrigatório" })
+    .string()
     .transform((val) => val.replace(/\D/g, ""))
-    .refine((val) => val.length === 14, "CNPJ deve conter 14 dígitos"),
+    .refine((val) => !val || val.length === 14, "CNPJ deve conter 14 dígitos")
+    .nullable()
+    .optional(),
   slug: z
     .string({ required_error: "Slug é obrigatório" })
-    .min(3, "Slug deve ter no mínimo 3 caracteres")
+    .min(2, "Slug deve ter no mínimo 2 caracteres")
     .regex(/^[a-z0-9-]+$/, "Slug deve conter apenas letras minúsculas, números e hífens"),
-  legalName: z.string().min(2, "Razão Social é obrigatória"),
+  legalName: z.string().min(2, "Razão Social é obrigatória").optional(),
   tradeName: z.string().min(2, "Nome Fantasia é obrigatório"),
   category: z.string().min(2, "Categoria é obrigatória"),
   phone: z.string().optional(),
